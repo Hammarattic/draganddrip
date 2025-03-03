@@ -1,0 +1,117 @@
+﻿@page "/draganddrop"
+@using Microsoft.JSInterop
+@inject IJSRuntime JS;
+@inject HttpClient Http
+
+
+<h3>DragAndDrop</h3>
+
+
+
+@* <button @onclick="FetchData">➕ fetch data</button> *@
+<button onclick="addBox()">➕ add a box</button>
+<input id="text" placeholder="input what you want to be displayed inisde the box" />
+
+<div class="main" style="width: 74px; height: 1000px; border: 2px solid red;">
+	<div id="draggable" style="width: 250px; height: 1000px">
+
+
+
+
+	</div>
+
+
+
+
+	@if (airports != null && airports.Any())
+	{
+		@foreach (var airport in airports)
+		{
+			<div id="draggable" class="draggable">
+				<p>Airport Name: @airport.airport_name</p>
+				<p>ICAO Code: @airport.icao_code</p>
+				<p>iata code @airport.iata_code </p>
+			</div>
+		}
+	}
+	else
+	{
+		<p>Loading...</p>   
+	}
+</div>
+head
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+	  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+	  crossorigin="" />
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+		crossorigin=""></script>
+<div id="map"></div>
+<style>
+	#map {
+		height: 180px;
+	}
+</style>
+
+ <script>
+		var map = L.map('map'); 
+		map.setView([51.505, -0.09], 13);
+</script>
+
+
+
+
+
+@code {
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		await JS.InvokeVoidAsync("dragAndDrop", ".draggable");
+
+	}
+}
+
+@code{
+
+
+	public List<Todo>? airports;
+
+
+
+
+
+	public async Task FetchData()
+	{
+
+		var response = await Http.GetFromJsonAsync<ApiResponse>("https://api.aviationstack.com/v1/airports?access_key=f12b95fb3bba92d6ed5da4c6f84fb82d");
+
+		// Log the response to check if it's valid
+
+
+		if (response?.data != null && response.data.Any())
+		{
+			airports = response.data;  // You can change this logic as per your requirement
+		}
+
+		StateHasChanged();
+
+
+	}
+
+
+	public class ApiResponse
+	{
+		public List<Todo> ?data { get; set; }
+	}
+
+	public class Todo
+	{
+		public string? id { get; set; }
+		public string? airport_name { get; set; }
+		public string? icao_code { get; set; }
+		public string? iata_code{ get; set; }
+	}
+}
+	
+}
