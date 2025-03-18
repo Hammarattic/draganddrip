@@ -2,6 +2,96 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JS;
 @inject HttpClient Http
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Corrected script paths (fixed typo 'javasctipt' to 'javascript') -->
+<script src="../javasctipt/airport.js"></script>
+<script src="../javasctipt/mapjs.js"></script>
+
+<!-- CSS for map container -->
+
+
+<!-- Textarea for airport search -->
+<textarea id="airportseach" placeholder="Enter airport name"></textarea>
+
+<!-- Button to trigger airport search and map update -->
+<button onclick="airportseach(); mapAndAirportSeach();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
+	Click Me
+</button>
+<button onclick="setSnapBoxToTrue();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
+	Click Me to enable snapping
+</button>
+<button onclick="setSnapBoxToFalse();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
+	Click Me to disable snapping
+
+</button>
+<button onclick="resetAllBoxes();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
+	Click Me to reset y (debug button)
+
+</button>
+@page "/call-dotnet-1"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<PageTitle>Call .NET 1</PageTitle>
+
+<h1>Call .NET Example 1</h1>
+
+<p>
+	<button onclick="airportseach();" id="btn">Trigger .NET static method</button>
+</p>
+
+<p>
+	See the result in the developer tools console.
+</p>
+
+@code {
+	private IJSObjectReference? module;
+
+
+
+	public static string evencoolerairportname;  // A static variable to store the airport name.
+
+
+	[JSInvokable]
+	public static Task<string> ReturnAirportNameAsyncsimple(string airportname)
+	{
+		evencoolerairportname = airportname;
+		AirportData.evencoolerairportname = evencoolerairportname;
+		return Task.FromResult(airportname);
+		
+	}
+		
+	public async ValueTask DisposeAsync()
+	{
+		if (module is not null)
+		{
+			try
+			{
+				await module.DisposeAsync();
+			}
+			catch (JSDisconnectedException)
+			{
+				Console.WriteLine("JS module was disconnected before disposal.");
+			}
+		}
+	}
+}
+
+
+<!-- Map container -->
+<div id="map"></div>
+
+<!-- Output for displaying airport data -->
+
+<div id="output"></div>
+
 
 
 <h3>DragAndDrop</h3>
@@ -9,54 +99,53 @@
 
 
 @* <button @onclick="FetchData">➕ fetch data</button> *@
-<button onclick="addBox()">➕ add a box</button>
-<input id="text" placeholder="input what you want to be displayed inisde the box" />
 
-<div class="main" style="width: 74px; height: 1000px; border: 2px solid red;">
-	<div id="draggable" style="width: 250px; height: 1000px">
+@page "/"
 
+@using BlazorApp1.Shared.Demos
+
+@inject IJSRuntime JS
+
+<div class="has-background-light">
+	<div class="hero">
+		<div class="hero-body has-background-blazor has-text-white has-text-centered">
+			<h1 class="title is-size-1 has-text-white">Blazor Sortable</h1>
+
+		</div>
 
 
 
 	</div>
+	<section class="section has-background-white">
+		<SimpleList></SimpleList>
+	</section>
 
-
-
-
-	@if (airports != null && airports.Any())
-	{
-		@foreach (var airport in airports)
-		{
-			<div id="draggable" class="draggable">
-				<p>Airport Name: @airport.airport_name</p>
-				<p>ICAO Code: @airport.icao_code</p>
-				<p>iata code @airport.iata_code </p>
-			</div>
-		}
-	}
-	else
-	{
-		<p>Loading...</p>   
-	}
 </div>
-head
+
+<div class="main" style="width: 100px; height: 1000px; border: 2px solid red;">
+	<div id="draggable" style="width: 250px; height: 1000px">
+		@* <div class="draggable">do not move!!!</div> *@
+	</div>
+</div>
+
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-	  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-	  crossorigin="" />
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin="" />
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-		crossorigin=""></script>
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
 <div id="map"></div>
 <style>
 	#map {
-		height: 180px;
+	height: 180px;
 	}
 </style>
 
- <script>
-		var map = L.map('map'); 
-		map.setView([51.505, -0.09], 13);
+<script>
+	var map = L.map('map'); 
+	map.setView([51.505, -0.09], 13);
 </script>
 
 
@@ -64,13 +153,26 @@ head
 
 
 @code {
+	
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (firstRender)
+		{
+			try
+			{
+				module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/CallDotnet1.js");
+				await module.InvokeVoidAsync("addHandlers");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error loading JavaScript module: {ex.Message}");
+			}
+		}
 		await JS.InvokeVoidAsync("dragAndDrop", ".draggable");
 
 	}
-}
+ }
 
 @code{
 
@@ -114,4 +216,4 @@ head
 	}
 }
 	
-}
+
