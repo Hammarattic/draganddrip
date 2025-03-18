@@ -1,0 +1,55 @@
+﻿@* @page "/call-dotnet-1"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<PageTitle>Call .NET 1</PageTitle>
+
+<h1>Call .NET Example 1</h1>
+
+<p>
+    <button id="btn">Trigger .NET static method</button>
+</p>
+
+<p>
+    See the result in the developer tools console.
+</p>
+
+@code {
+    private IJSObjectReference? module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/CallDotnet1.js");
+                await module.InvokeVoidAsync("addHandlers");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading JavaScript module: {ex.Message}");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public static Task<string> ReturnAirportNameAsync(string airportname) =>
+        Task.FromResult(airportname);
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                Console.WriteLine("JS module was disconnected before disposal.");
+            }
+        }
+    }
+}
+ *@

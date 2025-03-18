@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "gridstack": "^11.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.22.0"
+  }
+}
