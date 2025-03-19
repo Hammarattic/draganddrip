@@ -1,6 +1,6 @@
 ﻿@page "/draganddrop"
 @using Microsoft.JSInterop
-@inject IJSRuntime JS;
+@inject IJSRuntime JS
 @inject HttpClient Http
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -21,7 +21,8 @@ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><
 <textarea id="airportseach" placeholder="Enter airport name"></textarea>
 
 <!-- Button to trigger airport search and map update -->
-<button onclick="airportseach(); mapAndAirportSeach();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
+<!-- onclick="airportseach(); mapAndAirportSeach();" -->
+<button @onclick=OnClickMeClicked style="height: 40px; font-size: 16px; padding: 5px 10px;">
 	Click Me
 </button>
 <button onclick="setSnapBoxToTrue();" style="height: 40px; font-size: 16px; padding: 5px 10px;">
@@ -65,9 +66,9 @@ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><
 		evencoolerairportname = airportname;
 		AirportData.evencoolerairportname = evencoolerairportname;
 		return Task.FromResult(airportname);
-		
+
 	}
-		
+
 	public async ValueTask DisposeAsync()
 	{
 		if (module is not null)
@@ -117,7 +118,7 @@ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><
 
 	</div>
 	<section class="section has-background-white">
-		<SimpleList></SimpleList>
+		<SimpleList Itemz="Itemz"></SimpleList>
 	</section>
 
 </div>
@@ -143,22 +144,33 @@ crossorigin=""></script>
 	}
 </style>
 
-<script>
+@* <script>
 	var map = L.map('map'); 
 	map.setView([51.505, -0.09], 13);
-</script>
+</script> *@
 
 
 
 
 
 @code {
-	
+
+
+	protected IJSObjectReference AirportModule;
+	protected IJSObjectReference MapModule;
+
+	protected override void OnInitialized()
+	{
+		Itemz = new();
+		//return base.OnInitializedAsync();
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
+			AirportModule = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/airport.js");
+			MapModule = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/mapjs.js");
 			try
 			{
 				module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/CallDotnet1.js");
@@ -171,6 +183,27 @@ crossorigin=""></script>
 		}
 		await JS.InvokeVoidAsync("dragAndDrop", ".draggable");
 
+	}
+
+	public List<Item> Itemz;
+
+
+	public async Task OnClickMeClicked()
+	{
+		// airportseach(); mapAndAirportSeach(); OnClickMeClicked
+		await AirportModule.InvokeVoidAsync("airportseach");
+		await MapModule.InvokeVoidAsync("mapAndAirportSeach");
+
+		var airport = await JS.InvokeAsync<string>("window.nameOfAirport");
+
+		// add an item
+		var item = new Item()
+		{
+			Id = new Random().Next(1, 100000),
+			Name = airport
+		};
+		Itemz.Add(item);
+		Console.WriteLine("Parent items: " + Itemz.Count);
 	}
  }
 

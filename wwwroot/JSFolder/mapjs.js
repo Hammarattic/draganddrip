@@ -2,7 +2,7 @@
 let map
 let currentMarker
 
-function mapAndAirportSeach(lat2, lon2,iatacode) {
+export function mapAndAirportSeach(lat2, lon2,iatacode) {
 
     console.log("window.longlat2:", window.longlat2);
     console.log("window.longlat:", window.longlat);

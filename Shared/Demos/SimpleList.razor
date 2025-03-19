@@ -6,7 +6,7 @@
             <div class="columns">
                 <div class="column is-half">
                     <!-- SortableList component -->
-                    <SortableList Id="simpleList" Items="items" OnUpdate="@SortList" Context="item">
+                    <SortableList Id="simpleList" Items="Itemz" OnUpdate="@SortList" Context="item">
                         <SortableItemTemplate>
                             <div class="card has-border-light has-background-blazor has-text-white has-cursor-grab">
                                 <p class="is-size-4 p-2 ml-4">@item.Name</p>
@@ -28,15 +28,16 @@
     }
 
     [Parameter]
-    public List<Item> itemz { get; set; } = new List<Item>();
+    public List<Item> Itemz { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await JS.InvokeVoidAsync("logText", "hej");
-        var airportName = await JS.InvokeAsync<string>("getAirportName");
-        itemz = Enumerable.Range(1, 2)
-                          .Select(i => new Item { Id = i, Name = $"{airportName} {i}" })
-                          .ToList();
+        Console.WriteLine("List items" + Itemz.Count);
+        //await JS.InvokeVoidAsync("logText", "hej");
+        //var airportName = await JS.InvokeAsync<string>("getAirportName");
+       // Itemz = Enumerable.Range(1, 2)
+       //                    .Select(i => new Item { Id = i, Name = $"{airportName} {i}" })
+       //                    .ToList();
     }
 
     private string codeContent = $@"

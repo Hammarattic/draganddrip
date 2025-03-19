@@ -1,9 +1,11 @@
-﻿canClick = false;
+﻿import * as airport from './airport'
+
+canClick = false;
 boxsnap = false;
 let yPositions = {}; // Stores Y positions for each box
 movementControl = false
 
-function addBox(boxsnap = false) {
+export function addBox(boxsnap = false) {
     let container = document.getElementById("draggable");
 
     // Check if the box already exists to avoid duplicates
@@ -78,28 +80,28 @@ window.getAirportName = () => {
     return window.nameOfAirport;
 };
 
-function logItems(items) {
+export function logItems(items) {
     console.log("Logging items:", items);
 };
 
-function logText(text) {
+export function logText(text) {
     console.log(text);
 };
 
-function setSnapBoxToTrue() {
+export function setSnapBoxToTrue() {
     boxsnap = true;
     console.log(boxsnap + " boxsnap now set to true");
     addBox(boxsnap);
     return;
 }
 
-function setSnapBoxToFalse() {
+export function setSnapBoxToFalse() {
     boxsnap = false;
     console.log(boxsnap + " boxsnap now set to false");
     addBox(boxsnap);
     return;
 }
-function resetAllBoxes() {
+export function resetAllBoxes() {
     let boxes = document.querySelectorAll(".draggable"); // Get all the draggable boxes
     boxes.forEach(box => {
         box.dataset.y = "0"; // Reset Y position to 0
@@ -121,7 +123,7 @@ function resetAllBoxes() {
 //    btn.addEventListener("click", ReturnAirportNameAsync);
 //}
 // Function to handle dragging
-function dragAndDrop(className) {
+export function dragAndDrop(className) {
     interact(className).draggable({
         listeners: {
             start(event) {
@@ -216,7 +218,7 @@ function dragAndDrop(className) {
 }
 
 // Function to check if boxes are overlapping
-function isOverlapping(box) {
+export function isOverlapping(box) {
     let boxes = document.querySelectorAll(".draggable");
     let boxRect = box.getBoundingClientRect();
 

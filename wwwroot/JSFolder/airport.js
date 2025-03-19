@@ -1,6 +1,7 @@
+import * as map from './mapjs'
+import * as dad from './DragAndDrop'
 
-
-function airportseach(iatacode, lat2 , lon2 ){  
+export function airportseach(iatacode, lat2 , lon2 ){  
     const clientId = "oaA6Au8UplSW1w2PZj2mmoRt7lVc2sER";
     const clientSecret = "15DwGampdcLJ5vQf";
     console.log("code is updated "+lat2,lon2)
@@ -78,9 +79,9 @@ function airportseach(iatacode, lat2 , lon2 ){
     }
     getAirportData();
     setTimeout(function () {
-        mapAndAirportSeach()
-            addBox()
-        DotNet.invokeMethodAsync('BlazorApp1', 'ReturnAirportNameAsyncsimple', "tao").then(data => { console.log(data); });
+        map.mapAndAirportSeach()
+            dad.addBox()
+        //DotNet.invokeMethodAsync('BlazorApp1', 'ReturnAirportNameAsyncsimple', "tao").then(data => { console.log(data); });
         setTimeout(function () { 
             document.getElementById("airportseach").value = "";
         }, 1000)
