@@ -21,9 +21,6 @@
 
 @code {
 
-
-
-
     [JSInvokable]
     public async void ReturnAirportNameAsyncSimple(string airportname)
     {
@@ -40,11 +37,8 @@
         itemz = Enumerable.Range(1, 2)
                           .Select(i => new Item { Id = i, Name = $"{airportName} {i}" })
                           .ToList();
-
-        await JS.InvokeVoidAsync("logItems", itemz);
     }
 
-    // The code for rendering content inside the Tabs component
     private string codeContent = $@"
     <SortableList Id=""sortable"" Items=""items"" OnUpdate=""@SortList"" Context=""item"">
         <SortableItemTemplate>
@@ -63,7 +57,6 @@
 
         private void SortList((int oldIndex, int newIndex) indices)
         {{
-            // deconstruct the tuple
             var (oldIndex, newIndex) = indices;
 
             var items = this.items;
@@ -87,20 +80,16 @@
     
     public List<Item> items = Enumerable.Range(1, 2).Select(i => new Item { Id = i, Name = $"{AirportData.evencoolerairportname}" }).ToList();
 
-    // SortList method that will be triggered on list item update
     private async void SortList((int oldIndex, int newIndex) indices)
     {
         await JS.InvokeVoidAsync("logText", "hej");
 
-        await JS.InvokeVoidAsync("logItems", itemz);
-        // Deconstruct the tuple of indices for old and new positions
         var (oldIndex, newIndex) = indices;
 
         var items = this.items;
         var itemToMove = items[oldIndex];
         items.RemoveAt(oldIndex);
 
-        // Insert the moved item into the new index
         if (newIndex < items.Count)
         {
             items.Insert(newIndex, itemToMove);
@@ -110,27 +99,6 @@
             items.Add(itemToMove);
         }
 
-        // Refresh the component UI after changes
         StateHasChanged();
     }
-
-    private IJSObjectReference? module;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/airport.js");
-                await module.InvokeVoidAsync("addHandlers");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading JavaScript module: {ex.Message}");
-            }
-        }
-        await JS.InvokeVoidAsync("dragAndDrop", ".draggable");
-
-    }
-
 }
