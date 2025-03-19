@@ -25,7 +25,7 @@ export function mapAndAirportSeach(lat2, lon2,iatacode) {
         let point1 = [window.longlat.latitude, window.longlat.longitude]; // Point 1: London
         let point2 = [window.longlat2.latitude, window.longlat2.longitude];  // Point 2:
 
-
+        
     L.marker(point1).addTo(map)
         .bindPopup(`    ${window.RealnameOfAirport}`)  
             .openPopup();
@@ -40,7 +40,7 @@ export function mapAndAirportSeach(lat2, lon2,iatacode) {
 
         if (point1 && point2) {
             let latLngs = [point1, point2];
-            L.polyline(latLngs, { color: 'blue' }).addTo(map);
+            L.polyline(latLngs, { color: 'blue' }).addTo(map); 
         }
       
 

@@ -35,9 +35,17 @@
         Console.WriteLine("List items" + Itemz.Count);
         //await JS.InvokeVoidAsync("logText", "hej");
         //var airportName = await JS.InvokeAsync<string>("getAirportName");
-       // Itemz = Enumerable.Range(1, 2)
-       //                    .Select(i => new Item { Id = i, Name = $"{airportName} {i}" })
-       //                    .ToList();
+        // Itemz = Enumerable.Range(1, 2)
+        //                    .Select(i => new Item { Id = i, Name = $"{airportName} {i}" })
+        //                    .ToList();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Itemz is null)
+        {
+            Itemz = new();
+        }
     }
 
     private string codeContent = $@"
@@ -83,7 +91,7 @@
 
     private async void SortList((int oldIndex, int newIndex) indices)
     {
-        await JS.InvokeVoidAsync("logText", "hej");
+        //await JS.InvokeVoidAsync("logText", "hej");
 
         var (oldIndex, newIndex) = indices;
 

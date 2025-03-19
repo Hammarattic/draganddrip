@@ -1,9 +1,9 @@
-﻿import * as airport from './airport'
+﻿import * as airport from './airport.js'
 
-canClick = false;
-boxsnap = false;
+let canClick = false;
+let boxsnap = false;
 let yPositions = {}; // Stores Y positions for each box
-movementControl = false
+let movementControl = false
 
 export function addBox(boxsnap = false) {
     let container = document.getElementById("draggable");
@@ -38,7 +38,7 @@ export function addBox(boxsnap = false) {
             let lat2 = this.getAttribute("data-lat");
             let lon2 = this.getAttribute("data-lon");
             console.log("You clicked: " + lat2, lon2);
-            airportseach(iataCode, lat2, lon2);
+            airport.airportseach(iataCode, lat2, lon2);
         });
     }
 
@@ -63,7 +63,7 @@ export function addBox(boxsnap = false) {
         console.log("Latitude:", lat2);
         console.log("Longitude:", lon2);
 
-        airportseach(iataCode, lat2, lon2);
+        airport.airportseach(iataCode, lat2, lon2);
     } else {
         console.log("Need at least 2 airports to draw a line.");
     }
@@ -72,7 +72,7 @@ export function addBox(boxsnap = false) {
         let iataCode = this.getAttribute("data-airport");
         console.log("sending data to airport.js");
         console.log(iataCode);
-        airportseach(iataCode);
+        airport.airportseach(iataCode);
     });
 }
 

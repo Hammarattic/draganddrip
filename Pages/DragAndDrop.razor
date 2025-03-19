@@ -1,4 +1,5 @@
 ﻿@page "/draganddrop"
+@using BlazorApp1.Models
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 @inject HttpClient Http
@@ -36,7 +37,7 @@ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><
 	Click Me to reset y (debug button)
 
 </button>
-@page "/call-dotnet-1"
+@* @page "/call-dotnet-1"
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
@@ -50,7 +51,7 @@ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><
 
 <p>
 	See the result in the developer tools console.
-</p>
+</p> *@
 
 @code {
 	private IJSObjectReference? module;
@@ -144,10 +145,10 @@ crossorigin=""></script>
 	}
 </style>
 
-@* <script>
+<script>
 	var map = L.map('map'); 
 	map.setView([51.505, -0.09], 13);
-</script> *@
+</script>
 
 
 
@@ -158,6 +159,7 @@ crossorigin=""></script>
 
 	protected IJSObjectReference AirportModule;
 	protected IJSObjectReference MapModule;
+	protected IJSObjectReference DadModule;
 
 	protected override void OnInitialized()
 	{
@@ -171,17 +173,18 @@ crossorigin=""></script>
 		{
 			AirportModule = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/airport.js");
 			MapModule = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/mapjs.js");
-			try
-			{
-				module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/CallDotnet1.js");
-				await module.InvokeVoidAsync("addHandlers");
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Error loading JavaScript module: {ex.Message}");
-			}
+			DadModule = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/DragAndDrop.js");
+			// try
+			// {
+			// 	module = await JS.InvokeAsync<IJSObjectReference>("import", "./JSFolder/CallDotnet1.js");
+			// 	await module.InvokeVoidAsync("addHandlers");
+			// }
+			// catch (Exception ex)
+			// {
+			// 	Console.WriteLine($"Error loading JavaScript module: {ex.Message}");
+			// }
 		}
-		await JS.InvokeVoidAsync("dragAndDrop", ".draggable");
+		await DadModule.InvokeVoidAsync("dragAndDrop", ".draggable");
 
 	}
 
@@ -191,19 +194,38 @@ crossorigin=""></script>
 	public async Task OnClickMeClicked()
 	{
 		// airportseach(); mapAndAirportSeach(); OnClickMeClicked
-		await AirportModule.InvokeVoidAsync("airportseach");
+		// Get airport data and set the properties on the window object
+		var airport = await AirportModule.InvokeAsync<Airport>("airportseach");
+
+		if (airport is null)
+		{
+			return;
+		}
+
+		// Use the window properties to set position on the map
 		await MapModule.InvokeVoidAsync("mapAndAirportSeach");
 
-		var airport = await JS.InvokeAsync<string>("window.nameOfAirport");
+		// add a box
+		await DadModule.InvokeVoidAsync("addBox");
 
-		// add an item
-		var item = new Item()
+
+		try
 		{
-			Id = new Random().Next(1, 100000),
-			Name = airport
-		};
-		Itemz.Add(item);
-		Console.WriteLine("Parent items: " + Itemz.Count);
+			//var airport = await JS.InvokeAsync<string>("window.getAirportName");
+			// add an item
+			var item = new Item()
+				{
+					Id = new Random().Next(1, 100000),
+					Name = airport.Name
+				};
+			Itemz.Add(item);
+			Console.WriteLine("Parent items: " + Itemz.Count);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Undefined, " + ex.Message);
+		}
+
 	}
  }
 
